@@ -328,27 +328,44 @@ void update() {
 
 // === Entry point ===
 int main() {
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(SCR_W, SCR_H, "Tetris");
+    SetWindowMinSize(SCR_W / 2, SCR_H / 2);
     SetTargetFPS(60);
     reset();
 
+    RenderTexture2D rt = LoadRenderTexture(SCR_W, SCR_H);
+    SetTextureFilter(rt.texture, TEXTURE_FILTER_POINT);
+
     while (!WindowShouldClose()) {
-        // global keys (work even when paused)
         if (IsKeyPressed(KEY_R)) reset();
         if (IsKeyPressed(KEY_P) && !gameOver) paused = !paused;
 
         if (!paused) update();
 
-        BeginDrawing();
+        BeginTextureMode(rt);
         ClearBackground(BLACK);
         drawBoard();
         if (!gameOver) drawPiece();
         drawPanel();
         if (gameOver)      drawOverlay("GAME OVER", "Press R to restart", RED);
         else if (paused)   drawOverlay("PAUSED", "Press P to resume", YELLOW);
+        EndTextureMode();
+
+        BeginDrawing();
+        ClearBackground(BLACK);
+        float scale = std::min((float)GetScreenWidth() / SCR_W,
+                               (float)GetScreenHeight() / SCR_H);
+        float dw = SCR_W * scale;
+        float dh = SCR_H * scale;
+        Rectangle srcRec = {0, 0, (float)rt.texture.width, -(float)rt.texture.height};
+        Rectangle dstRec = {(GetScreenWidth() - dw) * 0.5f,
+                            (GetScreenHeight() - dh) * 0.5f, dw, dh};
+        DrawTexturePro(rt.texture, srcRec, dstRec, {0, 0}, 0.0f, WHITE);
         EndDrawing();
     }
 
+    UnloadRenderTexture(rt);
     CloseWindow();
     return 0;
 }
