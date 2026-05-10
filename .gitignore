@@ -46,9 +46,7 @@ build-*/
 
 # CMake generated files
 CMakeFiles/
-CMakeCache.txt
-cmake_install.cmake
-Makefile
+CMakeCache.txtcmake
 install_manifest.txt
 compile_commands.json
 
